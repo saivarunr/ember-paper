@@ -64,6 +64,7 @@ export default PowerSelect.extend(ValidationMixin, ChildMixin, FocusableMixin, {
     onOpen() {
       this._super(...arguments);
       this.notifyValidityChange();
+      this.sendAction('onOpen');
     }
   }
 });
