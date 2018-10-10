@@ -33,7 +33,13 @@ export default BasicDropdownComponent.extend({
     this._super(...arguments);
     this.didAnimateScale = false;
   },
-
+  didReceiveAttrs(){
+    this._super();
+    if(this.get('closePaperMenu')==true){
+      // Should check for true, not for objects or other
+      this.set('publicAPI.isOpen',false);
+    }
+  },
   position: 'target',
 
   // If attachment is a single item, duplicate it for our second value.
