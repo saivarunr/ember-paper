@@ -1,8 +1,8 @@
 import Component from '@ember/component';
 import { isPresent, isEmpty } from '@ember/utils';
 import { observer, computed } from '@ember/object';
-import { run } from '@ember/runloop';
 import layout from '../templates/components/paper-chips';
+import { invokeAction } from 'ember-invoke-action';
 
 export default Component.extend({
   layout,
@@ -17,7 +17,6 @@ export default Component.extend({
 
     return true;
   }),
-  resetTimer: null,
   lastItemChosen: false,
 
   handleFocusChange: observer('focusedElement', 'activeChip', function() {
@@ -28,9 +27,9 @@ export default Component.extend({
     }
 
     if ((element === 'chips' && (this.get('activeChip') !== -1)) || element === 'input') {
-      this.sendAction('focusIn', window.event);
+      invokeAction(this, 'focusIn', window.event);
     } else {
-      this.sendAction('focusOut', window.event);
+      invokeAction(this, 'focusOut', window.event);
     }
   }),
 
@@ -53,22 +52,17 @@ export default Component.extend({
           item[this.get('searchField')] = newItem;
         }
 
-        this.sendAction('addItem', item);
+        invokeAction(this, 'addItem', item);
         this.set('newChipValue', '');
-
-        if (isPresent(this.get('autocomplete'))) {
-          // We have an autocomplete - reset it once it's closed itself.
-          this.queueReset();
-        }
+        this.set('searchText', '');
       }
     },
 
     removeItem(item) {
-      this.sendAction('removeItem', item);
+      invokeAction(this, 'removeItem', item);
       let current = this.get('activeChip');
 
       if (current === -1 || current >= this.get('content').length) {
-        this.queueReset();
         this.set('activeChip', -1);
       }
     },
@@ -78,14 +72,15 @@ export default Component.extend({
 
       this.set('focusedElement', 'input');
 
-      if (!this.get('content').length && !input.is(':focus')) {
+      if (!this.get('content').length && input !== document.activeElement) {
         input.focus();
       } else {
         this.set('activeChip', -1);
       }
 
       // Keep track of the autocomplete, so we can force it to close when navigating to chips.
-      if (isEmpty(this.get('autocomplete')) && input.is('.ember-paper-autocomplete-search-input')) {
+
+      if (isEmpty(this.get('autocomplete')) && input.classList.contains('ember-paper-autocomplete-search-input')) {
         this.set('autocomplete', autocomplete);
       }
 
@@ -117,7 +112,7 @@ export default Component.extend({
     },
 
     chipsBlur(event) {
-      if (!this.focusMovingTo(this.getInput(), event)) {
+      if (!this.focusMovingTo('.md-chip-input-container input', event)) {
         this.set('focusedElement', 'none');
         this.set('activeChip', -1);
       }
@@ -130,7 +125,7 @@ export default Component.extend({
       // If we have a valid chip index, make it active.
       if (!isEmpty(index) && !this.get('readOnly')) {
         // Shift actual focus to wrap so that subsequent blur events work as expected.
-        this.$('md-chips-wrap').focus();
+        this.element.querySelector('md-chips-wrap').focus();
 
         // Update state to reflect the clicked chip being active.
         this.set('focusedElement', 'chips');
@@ -141,29 +136,28 @@ export default Component.extend({
     autocompleteChange(item) {
       if (item) {
         // Trigger onChange for the new item.
-        this.sendAction('addItem', item);
-
-        this.queueReset();
+        invokeAction(this, 'addItem', item);
+        this.set('searchText', '');
 
         // Track selection of last item if no match required.
         if (this.get('options').length === 1 && !this.get('requireMatch')) {
           this.set('lastItemChosen', true);
           this.set('autocomplete', null);
         }
-
-        return true;
       }
     },
 
-    searchTextChange(searchText, select) {
+    searchTextChange(value, select) {
+      this.set('searchText', value);
+
       // Close dropdown if search text is cleared by the user.
-      if (isEmpty(searchText)) {
+      if (isEmpty(value)) {
         select.actions.close();
       }
     },
 
     keyDown(event) {
-      let input = this.getInput().get(0);
+      let input = this.getInput();
       if (!this.get('readOnly') && isEmpty(input.value) && isPresent(this.get('content'))) {
         this.keyboardNavigation(event);
         if (this.get('activeChip') >= 0) {
@@ -178,14 +172,13 @@ export default Component.extend({
 
     noUnselected(old, event) {
       if (['Backspace', 'Delete', 'Del', 'ArrowLeft', 'Left', 'ArrowRight', 'Right'].includes(event.key)) {
-        this.sendAction('keyDown', event);
+        invokeAction(this, 'keyDown', event);
       } else if (event.key.length === 1 && !event.ctrlKey && !event.altKey && !event.metaKey) {
         // Reject printable key presses
         event.preventDefault();
         event.stopPropagation();
         return false;
       }
-
     }
   },
 
@@ -198,7 +191,7 @@ export default Component.extend({
     if (['ArrowLeft', 'Left'].includes(key) || (key === 'Backspace' && current === -1)) {
       if (current === -1) {
         input.blur();
-        this.$('md-chips-wrap', this.element).focus();
+        this.element.querySelector('md-chips-wrap').focus();
         this.set('activeChip', chips.length - 1);
       } else if (current > 0) {
         this.decrementProperty('activeChip');
@@ -213,40 +206,11 @@ export default Component.extend({
         input.focus();
       }
     } else if (current >= 0 && ['Backspace', 'Delete', 'Del'].includes(key)) {
-      this.sendAction('removeItem', chips[current]);
+      invokeAction(this, 'removeItem', chips[current]);
       if (current >= chips.length) {
-        this.queueReset();
         this.set('activeChip', -1);
       }
     }
-  },
-
-  resetInput() {
-    let select = this.get('autocomplete');
-    let input = this.getInput();
-
-    if (input.is('.ember-paper-autocomplete-search-input') && isPresent(select)) {
-      // Reset the underlying ember-power-select so that it's ready for another selection.
-      input.val('');
-      select.actions.search('');
-
-      // Close the dropdown after focusing the field.
-      input.focus();
-      select.actions.close();
-    } else {
-      input.focus();
-    }
-
-    this.set('focusedElement', 'input');
-    this.set('resetTimer', null);
-  },
-
-  queueReset() {
-    if (this.get('resetTimer')) {
-      run.cancel(this.get('resetTimer'));
-    }
-
-    this.set('resetTimer', run.next(this, this.resetInput));
   },
 
   closeAutocomplete() {
@@ -256,11 +220,12 @@ export default Component.extend({
   },
 
   getInput() {
-    return this.$('.md-chip-input-container input');
+    return this.element.querySelector('.md-chip-input-container input');
   },
 
   focusMovingTo(selector, event) {
-    if (!isEmpty(event) && !isEmpty(event.relatedTarget) && this.$().find(event.relatedTarget).is(selector)) {
+    let el = this.element.querySelector(selector);
+    if (!isEmpty(event) && !isEmpty(event.relatedTarget) && event.relatedTarget === el) {
       return true;
     }
 

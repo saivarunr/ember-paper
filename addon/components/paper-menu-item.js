@@ -6,6 +6,7 @@ import { or } from '@ember/object/computed';
 
 import layout from '../templates/components/paper-menu-item';
 import ChildMixin from 'ember-paper/mixins/child-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 /**
  * @class PaperMenuItem
@@ -20,15 +21,18 @@ export default Component.extend(ChildMixin, {
   shouldRenderButton: or('onClick', 'href'),
 
   actions: {
-    handleClick(event) {
+    handleClick(e) {
       this.get('dropdown.actions').close();
-      this.sendAction('onClick', event);
+      invokeAction(this, 'onClick', e);
     }
   },
 
   mouseEnter() {
     if (!this.get('disabled')) {
-      this.$('button').focus();
+      let button = this.element.querySelector('button');
+      if (button) {
+        button.focus();
+      }
     }
   }
 });

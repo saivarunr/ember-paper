@@ -1,19 +1,94 @@
 # Ember Paper Changelog
 
-#### Migrating from releases prior to 1.0
+### 1.0.0-beta.21
+- [#1036](https://github.com/miguelcobain/ember-paper/pull/1036) Fix infinite rendering issue with paper-tabs (fixes [#990](https://github.com/miguelcobain/ember-paper/issues/990))
+- [#1032](https://github.com/miguelcobain/ember-paper/pull/1032) Make paper-radio and paper-radio-group button accessible. paper-radio-group now yields a label component.
+- [01229ae](https://github.com/miguelcobain/ember-paper/commit/01229aec64dce6a9d2859e39a0d0402a974408ba) fix paper-menu not closing when backdrop is clicked
 
-Version 1.0 introduces many API changes relative to previous releases. In addition to the specific changelog listing below, the follow general changes have been made. Note that during the development of 1.0, the `master` branch reflects the most up-to-date version, with a mixture of updated and to-be-updated components.
+### 1.0.0-beta.20
+- [9503337](https://github.com/miguelcobain/ember-paper/commit/95033370c720244fcc0ed07a55a93bbbbd1cc0d4) fix changing paper-input value to empty string
 
-Contributions and pull requests are always welcome. Contributors may often be found on the [#e-paper channel on slack](https://embercommunity.slack.com/messages/e-paper/). Building the dummy application by installing `ember-paper` as if it were an application will provide you an up-to-date interactive demo, templates, and code samples.
+### 1.0.0-beta.19
+- [#794](https://github.com/miguelcobain/ember-paper/pull/794) forward primary/warn arguments to the toasts' paper-button.
+- [dd7979e](https://github.com/miguelcobain/ember-paper/commit/dd7979ec08a94be6470aa355c6da12db5b2ec20b) correctly escape paper-autocomplete-highlight output (fixes [#985](https://github.com/miguelcobain/ember-paper/issues/985)).
+- [#997](https://github.com/miguelcobain/ember-paper/pull/997) remove autoprefixer. *Users should install ember-cli-autoprefixer on their apps from now on.* This makes autoprefixer to run according to your target browsers in your project.
+- This ember-paper version no longer relies on jQuery. Credits to @betocantu93 for the inumerous PRs to refactor this.
+- [#1024](https://github.com/miguelcobain/ember-paper/pull/1024) Associate input field with corresponding info messages for better a11y
+- [#1026](https://github.com/miguelcobain/ember-paper/pull/1026) support `aria-hidden` argument on paper-icon
+- [#588](https://github.com/miguelcobain/ember-paper/pull/588) Allow paper-autocomplete to be blockless
+- [#1021](https://github.com/miguelcobain/ember-paper/pull/1021) [#1028](https://github.com/miguelcobain/ember-paper/pull/1028) you can now whitelist/blacklist components (JS and CSS)
+- [#1027](https://github.com/miguelcobain/ember-paper/pull/1027) fix paper-select with `searchEnabled=true`
+- [#1029](https://github.com/miguelcobain/ember-paper/pull/1029) add title attribute to paper-input 
+- [#1031](https://github.com/miguelcobain/ember-paper/pull/1031) a11y for paper-checkbox
+- [7abaeaa](https://github.com/miguelcobain/ember-paper/commit/7abaeaac953446e348f09400a108497e0909526e) fix paper-tabs ink bar placement when using `isSelected` on `{{tabs.tab}}` (partially reverts [#980](https://github.com/miguelcobain/ember-paper/pull/980))
+- [14e3f0f](https://github.com/miguelcobain/ember-paper/commit/14e3f0ffcaff3c4cfb9b93ff44f989da2a9a64dd) update project's ember and ember-cli and fix linting errors. **update AM to 1.1.10**.
 
-- Attributes are now `camelCased` rather than `kebab-cased`.
-- Components which accept user input, such as `paper-input`, `paper-checkbox`, `paper-switch` and `paper-select` now receive their input via the one-way `value` attribute and notify of a changed value by the `onChange` actions.
-- When provided by the API, `onChange` actions are required and throw an assertion if not provided.
-- Actions maybe be specified by a string action name (`onChange="updateValue"`) or an action closure (`onChange=(action (mut "myValue"))`). If you need to specify a target or additional parameter, you must use an action closure.
-- Many attributes have been renamed for clarity and consistency. See the specific changes below.
-- `paper-icon`'s `size` attribute now takes a size in pixels, and `lg` or `sm` values are no longer supported.
-- renamed the `paper-radio-group` `paper-radio` to just `radio` -- usage would now be `group.radio` as opposed to `group.paper-radio`.
-- Flex and layout attributes are replaced by classes (see [the documentation](http://miguelcobain.github.io/ember-paper/#/layout/introduction)). `flex=true` on Ember Paper components has also been removed and replaced by classes.
+### 1.0.0-beta.18
+- [68ca72e](https://github.com/miguelcobain/ember-paper/commit/d931d1918e9ddd208cecf045bb6378b39148d7d1) not using ember-cli-sass-variables-export addon anymore since it doesn't output the generated files when using `ember build` (just `ember s`). We're manually including the generated files until we find a better solution. The palettes aren't likely to change anyway.
+
+### 1.0.0-beta.17
+- [d931d19](https://github.com/miguelcobain/ember-paper/commit/d931d1918e9ddd208cecf045bb6378b39148d7d1) Fix several issues with default colors, hues and contrasts.
+
+### 1.0.0-beta.16
+- [e82f32d](https://github.com/miguelcobain/ember-paper/commit/e82f32d2830b1e645879a1a2fa7401d9ffbb1e3f) Fix tooltip contrast color.
+
+### 1.0.0-beta.15
+- [0b57abf](https://github.com/miguelcobain/ember-paper/commit/0b57abf78202db7b3de301557e7b6a914dc32391) Some background color expressions in AM scss weren't being replaced with the correct colors. This made, for example, `.md-avatar-icon` to have the wrong colors.
+
+### 1.0.0-beta.14
+- [df7b5af](https://github.com/miguelcobain/ember-paper/commit/df7b5af8a6245d855e3fc268866dd8c0fe00bf46) bump ember-cli-sass-variables-export. Should now correctly work with ember-cli-sass 7 and below.
+- [#980](https://github.com/miguelcobain/ember-paper/pull/980) fixes "You modified canPageBack twice in a single render" on paper tabs. Also fixes `_selectedTab` computed getting triggered multiple times unecessarily.
+- [#981](https://github.com/miguelcobain/ember-paper/pull/981) Correctly call `paper-contrast-color` on the deprecated `contrastColor` function.
+
+### 1.0.0-beta.13
+- [a9ac019](https://github.com/miguelcobain/ember-paper/commit/a9ac019ed9203e68f971fcb925827090aafa6d41) use `addAddonToProject` to install ember-cli-sass on ember-paper install. This makes sure that any ember-cli-sass blueprint is run.
+- [6bddb15](https://github.com/miguelcobain/ember-paper/commit/6bddb1500e99abef61081a44e322d44dddfc3863) support label and placeholder simultaneously on paper-inputs
+- [d53b9d7](https://github.com/miguelcobain/ember-paper/commit/d53b9d7a6a0ea796d3a7a6bdbc75a767de7f277f) bump ember-cli-sass-variables-export. ember-paper is now compatible with dart sass, node sass and latest ember-cli-sass versions.
+
+### 1.0.0-beta.12
+- [f63c337](https://github.com/miguelcobain/ember-paper/commit/f63c3377796dac642005f347da209d0323b1ce2c) fix for accidentally broken palette generation on beta.11
+
+### 1.0.0-beta.11
+- [0184166](https://github.com/miguelcobain/ember-paper/commit/0184166929aedb9ae26713b943a3d8e3a29c9fa3) move ember-invoke-action to dependencies
+- [07f591c](https://github.com/miguelcobain/ember-paper/commit/07f591ca50b3cd836eb7e3f36e0f7ad3367519db) rename `generateTheme` util to `generatePalette`
+- [20b99f9](https://github.com/miguelcobain/ember-paper/commit/20b99f9c259364b81e910baa171e541c8e6423b7) `generatePalette` should return string representations and not tinycolor instances
+
+### 1.0.0-beta.10
+- [#973](https://github.com/miguelcobain/ember-paper/pull/973) fix ember 3.4 closure actions deprecation
+
+### 1.0.0-beta.9
+- [#958](https://github.com/miguelcobain/ember-paper/pull/958) fix input validations
+- [#971](https://github.com/miguelcobain/ember-paper/pull/971) support disabled tabs
+- [8c637bc...0bb4ea1](https://github.com/miguelcobain/ember-paper/compare/8c637bcda8f51583fbcbaa6c0dff37ee08a363b6...0bb4ea110fb2dd9ba40ec455a2ee24e23d4aa073) implement runtime theming using css variables
+
+### 1.0.0-beta.8
+- [#924](https://github.com/miguelcobain/ember-paper/pull/924) fix css issue when paper-menu dense=true and content is scrollable
+- [666f06d](https://github.com/miguelcobain/ember-paper/commit/666f06d05dc0e90ce4726d1cd34f2daa28b1f542) fix progress-circular on fastboot (fixes [#927](https://github.com/miguelcobain/ember-paper/issues/927))
+- [#941](https://github.com/miguelcobain/ember-paper/pull/941) render md-select-header outside of md-content on paper-select when searchEnabled=true
+- [#954](https://github.com/miguelcobain/ember-paper/pull/954) support optional `defaultHighlighted` on paper-chips
+- [#956](https://github.com/miguelcobain/ember-paper/pull/956) don't use paper-autocomplete _innerText (fixes [#932](https://github.com/miguelcobain/ember-paper/issues/932), [#935](https://github.com/miguelcobain/ember-paper/issues/935) and [#787](https://github.com/miguelcobain/ember-paper/issues/787))
+- [#943](https://github.com/miguelcobain/ember-paper/pull/943) fix defaultAttrs error for paper-virtual-repeat
+- [#964](https://github.com/miguelcobain/ember-paper/pull/964) make ripple touch events passive
+- [#962](https://github.com/miguelcobain/ember-paper/pull/962) Grid list: handle tile order and length changes
+
+### 1.0.0-beta.7
+- [3d6f299](https://github.com/miguelcobain/ember-paper/commit/3d6f2996a4e24b9c76519dcc0dd094b61658ec77) bump angular material styles to 1.1.9
+
+### 1.0.0-beta.6
+- [#915](https://github.com/miguelcobain/ember-paper/pull/915) replace ember-wormhole with ember-maybe-in-element
+- [#895](https://github.com/miguelcobain/ember-paper/pull/895) fix paper-select positioning when content is scrollable
+- [#912](https://github.com/miguelcobain/ember-paper/pull/912) add `title` attribute to paper-item
+- [#903](https://github.com/miguelcobain/ember-paper/pull/903) fix progress-circular, now renders correctly in determinate mode
+
+### 1.0.0-beta.5
+- [#873](https://github.com/miguelcobain/ember-paper/pull/873) bump ember-composability tools (removes `project.nodeModulesPath` deprecation message)
+- [cf172a9](https://github.com/miguelcobain/ember-paper/commit/cf172a93b4d0c8bf7836e9e80092799aee216271) proxy `errors` proeprty to paper-autocomplete input
+- [a86534f](https://github.com/miguelcobain/ember-paper/commit/a86534faed32cedda653de4e8df774108a8eb3b7) register ember-paper version in ember inspector
+- [37444e6](https://github.com/miguelcobain/ember-paper/commit/37444e60b08f0de49c8d4c218848122f0f51c0b0) guard tooltip event handler when destroyed
+- [#875](https://github.com/miguelcobain/ember-paper/pull/875) add `autofocus` to autocomplete-trigger input
+- [#900](https://github.com/miguelcobain/ember-paper/pull/900) allows paper-radio values to be `0`
+- [#888](https://github.com/miguelcobain/ember-paper/pull/888) add `rel` to paper-button
+- [#911](https://github.com/miguelcobain/ember-paper/pull/911) removes [deprecation](https://deprecations-app-prod.herokuapp.com/deprecations/v3.x/#toc_ember-meta-descriptor-on-object) that caused `validationErrorMessages` computed to never update after it's initialized
 
 ### 1.0.0-beta.4
 - [68f4832](https://github.com/miguelcobain/ember-paper/commit/68f4832b67a3fd544164b1ace17d50d974b11ad2) add correct overflow class when dialog does not contain images (fixes [#807](https://github.com/miguelcobain/ember-paper/issues/807))
@@ -245,6 +320,21 @@ Contributions and pull requests are always welcome. Contributors may often be fo
 - Updated the dependency on hammer from `hammerjs` to `hammer.js` . (Also backported to 0.2.14.)
   - Update your project's `bower.json` to require `"hammer.js": "^2.0.8"`. Remove `bower_components/hammerjs`. Run `bower cache clean`, then `bower install`.
 - [5521f3b](https://github.com/miguelcobain/ember-paper/commit/5521f3b246be4c24cd54f5e0b5383fc9e78e24dd ) Validation status on `paper-input` is exposed via `onInvalid` action.
+
+#### Migrating from releases prior to 1.0
+
+Version 1.0 introduces many API changes relative to previous releases. In addition to the specific changelog listing below, the follow general changes have been made. Note that during the development of 1.0, the `master` branch reflects the most up-to-date version, with a mixture of updated and to-be-updated components.
+
+Contributions and pull requests are always welcome. Contributors may often be found on the [#e-paper channel on Discord](https://discord.gg/zT3asNS). Building the dummy application by installing `ember-paper` as if it were an application will provide you an up-to-date interactive demo, templates, and code samples.
+
+- Attributes are now `camelCased` rather than `kebab-cased`.
+- Components which accept user input, such as `paper-input`, `paper-checkbox`, `paper-switch` and `paper-select` now receive their input via the one-way `value` attribute and notify of a changed value by the `onChange` actions.
+- When provided by the API, `onChange` actions are required and throw an assertion if not provided.
+- Actions maybe be specified by a string action name (`onChange="updateValue"`) or an action closure (`onChange=(action (mut "myValue"))`). If you need to specify a target or additional parameter, you must use an action closure.
+- Many attributes have been renamed for clarity and consistency. See the specific changes below.
+- `paper-icon`'s `size` attribute now takes a size in pixels, and `lg` or `sm` values are no longer supported.
+- renamed the `paper-radio-group` `paper-radio` to just `radio` -- usage would now be `group.radio` as opposed to `group.paper-radio`.
+- Flex and layout attributes are replaced by classes (see [the documentation](http://miguelcobain.github.io/ember-paper/#/layout/introduction)). `flex=true` on Ember Paper components has also been removed and replaced by classes.
 
 ### 0.2.14
 

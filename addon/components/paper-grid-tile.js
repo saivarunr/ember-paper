@@ -8,6 +8,7 @@ import { computed } from '@ember/object';
 import { run } from '@ember/runloop';
 import layout from '../templates/components/paper-grid-tile';
 import { ChildMixin } from 'ember-composability-tools';
+import { invokeAction } from 'ember-invoke-action';
 
 const positionCSS = (positions) => {
   return `calc((${positions.unit} + ${positions.gutter}) * ${positions.offset})`;
@@ -19,6 +20,12 @@ const dimensionCSS = (dimensions) => {
 
 const unitCSS = (units) => {
   return `${units.share}% - (${units.gutter} * ${units.gutterShare})`;
+};
+
+const applyStyles = (el, styles) => {
+  for (let key in styles) {
+    el.style[key] = styles[key];
+  }
 };
 
 /**
@@ -33,12 +40,15 @@ export default Component.extend(ChildMixin, {
 
   didUpdateAttrs() {
     this._super(...arguments);
-    this.updateTile();
+    let gridList = this.get('gridList');
+
+    // Debounces until the next run loop
+    run.debounce(gridList, gridList.updateGrid, 0);
   },
 
   updateTile() {
-    let gridList = this.get('gridList');
-    run.debounce(gridList, gridList.updateGrid, 50);
+    applyStyles(this.element, this._tileStyle());
+    invokeAction(this, 'onUpdate');
   },
 
   colspanMedia: computed('colspan', function() {

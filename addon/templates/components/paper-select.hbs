@@ -12,7 +12,7 @@
   as |menu|}}
 
   {{#if shouldShowLabel}}
-    <label for={{concat "ember-basic-dropdown-trigger-" publicAPI.uniqueId}} class="{{if required "md-required"}}">{{label}}</label>
+    <label for={{concat "ember-basic-dropdown-trigger-" publicAPI.uniqueId}} class={{if required "md-required"}}>{{label}}</label>
   {{/if}}
 
   {{#menu.trigger
@@ -85,10 +85,12 @@
     {{/if}}
 
     {{#if mustShowSearchMessage}}
-      {{component searchMessageComponent
-        searchMessage=(readonly searchMessage)
-        select=(readonly publicAPI)
-      }}
+      <md-content>
+        {{component searchMessageComponent
+          searchMessage=(readonly searchMessage)
+          select=(readonly publicAPI)
+        }}
+      </md-content>
     {{else if mustShowNoMessages}}
       {{#if (hasBlock "inverse")}}
         {{yield to="inverse"}}

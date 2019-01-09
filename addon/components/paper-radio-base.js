@@ -9,6 +9,7 @@ import layout from '../templates/components/paper-radio-base';
 import FocusableMixin from 'ember-paper/mixins/focusable-mixin';
 import RippleMixin from 'ember-paper/mixins/ripple-mixin';
 import ColorMixin from 'ember-paper/mixins/color-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 /**
  * @class PaperRadio
@@ -22,10 +23,16 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, {
   tagName: 'md-radio-button',
   classNames: ['md-default-theme'],
   classNameBindings: ['checked:md-checked'],
+  attributeBindings: [
+    'role',
+    'ariaChecked:aria-checked',
+    'ariaLabel:aria-label'
+  ],
 
   tabindex: null,
 
   toggle: false,
+  role: 'radio',
 
   /* Ripple Overrides */
   rippleContainerSelector: '.md-container',
@@ -46,12 +53,20 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, {
     return this.get('groupValue') === this.get('value');
   }),
 
+  ariaChecked: computed('checked', function() {
+    return this.get('checked') ? 'true' : 'false';
+  }),
+
+  labelId: computed('elementId', function() {
+    return `${this.elementId}-label`;
+  }),
+
   click() {
     if (!this.get('disabled')) {
       if (this.get('toggle')) {
-        this.sendAction('onChange', this.get('checked') ? null : this.get('value'));
+        invokeAction(this, 'onChange', this.get('checked') ? null : this.get('value'));
       } else {
-        this.sendAction('onChange', this.get('value'));
+        invokeAction(this, 'onChange', this.get('value'));
       }
     }
     // Prevent bubbling, if specified. If undefined, the event will bubble.

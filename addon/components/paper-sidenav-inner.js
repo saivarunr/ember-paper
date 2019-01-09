@@ -3,12 +3,11 @@
  */
 /* globals FastBoot */
 import { inject as service } from '@ember/service';
-
 import Component from '@ember/component';
 import { computed } from '@ember/object';
-import $ from 'jquery';
 import { run } from '@ember/runloop';
 import TransitionMixin from 'ember-css-transitions/mixins/transition-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 /**
  * @class PaperSidenavInner
@@ -48,7 +47,8 @@ export default Component.extend(TransitionMixin, {
 
   didInsertElement() {
     this._super(...arguments);
-    $(window).on(`resize.${this.elementId}`, run.bind(this, 'updateLockedOpen'));
+    this._updateOnResize = run.bind(this, this.updateLockedOpen);
+    window.addEventListener('resize', this._updateOnResize);
     this.updateLockedOpen();
   },
 
@@ -61,11 +61,13 @@ export default Component.extend(TransitionMixin, {
 
   willDestroyElement() {
     this._super(...arguments);
-    $(window).off(`resize.${this.elementId}`);
+    window.removeEventListener('resize', this._updateOnResize);
     this.get('paperSidenav').unregister(this.get('name'), this);
+    this._updateOnResize = null;
   },
 
   updateLockedOpen() {
+
     let lockedOpen = this.get('lockedOpen');
     let isLockedOpen;
 
@@ -86,32 +88,32 @@ export default Component.extend(TransitionMixin, {
       // if sidenav is open and we enter lockedOpen,
       // make the sidenav enter the "closed" state
       if (!this.get('closed') && isLockedOpen) {
-        this.sendAction('onToggle', false);
+        invokeAction(this, 'onToggle', false);
       }
     }
   },
 
   click() {
     if (this.get('closeOnClick') && !this.get('isLockedOpen')) {
-      this.sendAction('onToggle', false);
+      invokeAction(this, 'onToggle', false);
     }
   },
 
   open() {
     if (this.get('closed') && this.get('isLockedOpen')) {
-      this.sendAction('onToggle', true);
+      invokeAction(this, 'onToggle', true);
     }
   },
 
   close() {
     if (!this.get('closed') && !this.get('isLockedOpen')) {
-      this.sendAction('onToggle', false);
+      invokeAction(this, 'onToggle', false);
     }
   },
 
   toggle() {
     if (!this.get('isLockedOpen')) {
-      this.sendAction('onToggle', this.get('closed'));
+      invokeAction(this, 'onToggle', this.get('closed'));
     }
   }
 });

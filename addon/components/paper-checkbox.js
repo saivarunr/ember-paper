@@ -3,6 +3,7 @@
  */
 import { inject as service } from '@ember/service';
 
+import { computed } from '@ember/object';
 import { not, and } from '@ember/object/computed';
 import Component from '@ember/component';
 import { assert } from '@ember/debug';
@@ -11,7 +12,7 @@ import FocusableMixin from 'ember-paper/mixins/focusable-mixin';
 import RippleMixin from 'ember-paper/mixins/ripple-mixin';
 import ColorMixin from 'ember-paper/mixins/color-mixin';
 import ProxiableMixin from 'ember-paper/mixins/proxiable-mixin';
-
+import { invokeAction } from 'ember-invoke-action';
 /**
  * @class PaperCheckbox
  * @extends Ember.Component
@@ -25,6 +26,12 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, Proxiab
   tagName: 'md-checkbox',
   classNames: ['md-checkbox', 'md-default-theme'],
   classNameBindings: ['isChecked:md-checked', 'indeterminate:md-indeterminate'],
+  attributeBindings: [
+    'role:role',
+    'ariaLabel:aria-label',
+    'ariaChecked:aria-checked',
+    'labelId:aria-labelledby'
+  ],
 
   /* RippleMixin Overrides */
   rippleContainerSelector: '.md-container',
@@ -38,9 +45,20 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, Proxiab
   constants: service(),
 
   value: false,
+  role: 'checkbox',
 
   notIndeterminate: not('indeterminate'),
   isChecked: and('notIndeterminate', 'value'),
+  ariaChecked: computed('isChecked', 'indeterminate', function() {
+    if (this.get('indeterminate')) {
+      return 'mixed';
+    }
+
+    return this.get('isChecked') ? 'true' : 'false';
+  }),
+  labelId: computed('elementId', function() {
+    return `${this.elementId}-label`;
+  }),
 
   init() {
     this._super(...arguments);
@@ -49,7 +67,7 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, Proxiab
 
   click() {
     if (!this.get('disabled')) {
-      this.sendAction('onChange', !this.get('value'));
+      invokeAction(this, 'onChange', !this.get('value'));
     }
     // Prevent bubbling, if specified. If undefined, the event will bubble.
     return this.get('bubbles');
@@ -63,6 +81,6 @@ export default Component.extend(FocusableMixin, RippleMixin, ColorMixin, Proxiab
   },
 
   processProxy() {
-    this.sendAction('onChange', !this.get('value'));
+    invokeAction(this, 'onChange', !this.get('value'));
   }
 });

@@ -1,6 +1,7 @@
 git checkout -b <new_branch> <last_commit_hash_of_a_release>
 
 # Ember Paper [![Build Status](https://travis-ci.org/miguelcobain/ember-paper.svg)](https://travis-ci.org/miguelcobain/ember-paper) [![Ember Observer Score](http://emberobserver.com/badges/ember-paper.svg)](http://emberobserver.com/addons/ember-paper) [![Slack Status](https://ember-community-slackin.herokuapp.com/badge.svg)](https://ember-community-slackin.herokuapp.com/)
+# Ember Paper [![Build Status](https://travis-ci.org/miguelcobain/ember-paper.svg)](https://travis-ci.org/miguelcobain/ember-paper) [![Ember Observer Score](http://emberobserver.com/badges/ember-paper.svg)](http://emberobserver.com/addons/ember-paper) [![Discord](https://img.shields.io/discord/480462759797063690.svg?logo=discord)](https://discord.gg/zT3asNS)
 
 This project aims to bring Google's new [Material Design](https://www.google.com/design/spec/material-design/introduction.html) to Ember. The goal is to encapsulate everything possible in Ember components. This project is packaged as an [Ember-cli](http://www.ember-cli.com/) addon.
 
@@ -21,21 +22,18 @@ Navigate through the docs to understand how to use each component.
 
 ## Resources
 
-- The team can often be found on the [#e-paper channel on slack](https://embercommunity.slack.com/messages/e-paper/). Features and designs are discussed there prior to implementation. Get your invite to Ember Community Slack [here](https://ember-community-slackin.herokuapp.com/).
+- Contributors can often be found on the [#e-paper channel on discord](https://discord.gg/zT3asNS).
 
 - The [GitHub milestone issue](https://github.com/miguelcobain/ember-paper/issues/249) tracks our progress to version 1.0.
 
-- Building the `ember-paper` demo application will give you your own up-to-date reference. This can be accomplished by installing ember-paper as if it were an application and running `ember server`.
-
-- **Ready to help?** Read our [Contributing Guide](CONTRIBUTING.md).
+- Building the `ember-paper` demo application will give you your own up-to-date reference. This can be accomplished by cloning ember-paper as if it were an application and running `ember server`.
 
 ## Contributing
 
-This is a very ambitious project. Google's design specs are extensive, and non-trivial to implement. If you can port or fix a component or two, please drop a pull request or issue on GitHub or join us on slack.
+This is an ambitious project. Google's design specs are extensive, and non-trivial to implement. If you can port or fix a component or two, please drop a pull request or issue on GitHub or join us on Discord.
 
 With everyone's help, we can bring this amazing design spec to Ember in a modular and elegant way. The Ember way.
 
-License
-------------------------------------------------------------------------------
+## License
 
 This project is licensed under the [MIT License](LICENSE.md).

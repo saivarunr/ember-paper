@@ -3,13 +3,14 @@
  */
 import { inject as service } from '@ember/service';
 
-import { filterBy, mapBy } from '@ember/object/computed';
+import { filterBy, mapBy, notEmpty } from '@ember/object/computed';
 import Component from '@ember/component';
 import { assert } from '@ember/debug';
 import layout from '../templates/components/paper-radio-group';
 import FocusableMixin from 'ember-paper/mixins/focusable-mixin';
 import { ParentMixin } from 'ember-composability-tools';
 import { isPresent } from '@ember/utils';
+import { invokeAction } from 'ember-invoke-action';
 
 /**
  * @class PaperRadioGroup
@@ -26,6 +27,8 @@ export default Component.extend(FocusableMixin, ParentMixin, {
   focusOnlyOnKey: true,
 
   radioComponent: 'paper-radio',
+  labelComponent: 'paper-radio-group-label',
+  role: 'radiogroup',
 
   constants: service(),
 
@@ -35,8 +38,14 @@ export default Component.extend(FocusableMixin, ParentMixin, {
     assert('{{paper-radio-group}} requires an `onChange` action or null for no action', this.get('onChange') !== undefined);
   },
 
+  attributeBindings: [
+    'role',
+    'ariaLabelledby:aria-labelledby'
+  ],
+
   enabledChildRadios: filterBy('childComponents', 'disabled', false),
   childValues: mapBy('enabledChildRadios', 'value'),
+  hasLabel: notEmpty('labelNode'),
 
   keyDown(ev) {
 
@@ -67,12 +76,12 @@ export default Component.extend(FocusableMixin, ParentMixin, {
 
     let childRadio = this.get('enabledChildRadios').objectAt(index);
     childRadio.set('focused', true);
-    this.sendAction('onChange', childRadio.get('value'));
+    invokeAction(this, 'onChange', childRadio.get('value'));
   },
 
   actions: {
     onChange(value) {
-      this.sendAction('onChange', value);
+      invokeAction(this, 'onChange', value);
     }
   }
 });

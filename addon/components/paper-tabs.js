@@ -3,9 +3,11 @@ import { gt } from '@ember/object/computed';
 import { computed, observer } from '@ember/object';
 import Component from '@ember/component';
 import { htmlSafe } from '@ember/string';
+import { scheduleOnce, next } from '@ember/runloop';
 import layout from '../templates/components/paper-tabs';
 import { ParentMixin } from 'ember-composability-tools';
 import ColorMixin from 'ember-paper/mixins/color-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 export default Component.extend(ParentMixin, ColorMixin, {
   layout,
@@ -24,6 +26,7 @@ export default Component.extend(ParentMixin, ColorMixin, {
 
   _selectedTabDidChange: observer('_selectedTab', function() {
     let selectedTab = this.get('_selectedTab');
+
     let previousSelectedTab = this.get('_previousSelectedTab');
 
     if (selectedTab === previousSelectedTab) {
@@ -31,6 +34,7 @@ export default Component.extend(ParentMixin, ColorMixin, {
     }
 
     this.setMovingRight();
+
     this.fixOffsetIfNeeded();
 
     this.set('_previousSelectedTab', selectedTab);
@@ -54,9 +58,7 @@ export default Component.extend(ParentMixin, ColorMixin, {
     return this.get('childComponents').reduce((prev, t) => prev + t.get('width'), 0);
   }),
 
-  shouldPaginate: computed('canvasWidth', function() {
-    return this.get('tabsWidth') > this.get('canvasWidth');
-  }),
+  shouldPaginate: false,
 
   shouldCenter: computed('shouldPaginate', 'center', function() {
     return !this.get('shouldPaginate') && this.get('center');
@@ -72,17 +74,31 @@ export default Component.extend(ParentMixin, ColorMixin, {
     let updateCanvasWidth = () => {
       this.updateDimensions();
       this.updateStretchTabs();
+      this.fixOffsetIfNeeded();
     };
 
     window.addEventListener('resize', updateCanvasWidth);
     window.addEventListener('orientationchange', updateCanvasWidth);
     this.updateCanvasWidth = updateCanvasWidth;
+
+    // trigger updateDimensions to calculate shouldPaginate early on
+    this.updateDimensions();
+    scheduleOnce('afterRender', () => {
+      next(() => {
+        // here the previous and next buttons should already be renderd
+        // and hence the offsets are correctly calculated
+        if (!this.isDestroyed && !this.isDestroying) {
+          this.updateDimensions();
+          this.fixOffsetIfNeeded();
+        }
+      });
+    });
   },
 
   didRender() {
     this._super(...arguments);
+    // this makes sure that the tabs react to stretch and center changes
     this.updateCanvasWidth();
-
   },
 
   willDestroyElement() {
@@ -109,18 +125,27 @@ export default Component.extend(ParentMixin, ColorMixin, {
     let canvasWidth = this.get('canvasWidth');
     let currentOffset = this.get('currentOffset');
 
-    let tabRight = this.get('_selectedTab.left') + this.get('_selectedTab.width');
-    if (tabRight - currentOffset > canvasWidth) {
-      let newOffset = tabRight - canvasWidth;
-      this.set('currentOffset', newOffset);
-      this.set('paginationStyle', htmlSafe(`transform: translate3d(-${newOffset}px, 0px, 0px);`));
+    let tabLeftOffset = this.get('_selectedTab.left');
+    let tabRightOffset = tabLeftOffset + this.get('_selectedTab.width');
+
+    let newOffset;
+    if (canvasWidth < this.get('_selectedTab.width')) {
+      // align with selectedTab if canvas smaller than selected tab
+      newOffset = tabLeftOffset;
+    } else if (tabRightOffset - currentOffset > canvasWidth) {
+      // ensure selectedTab is not partially hidden on the right side
+      newOffset = tabRightOffset - canvasWidth;
+    } else if (tabLeftOffset < currentOffset) {
+      // ensure selectedTab is not partially hidden on the left side
+      newOffset = tabLeftOffset;
     }
 
-    if (this.get('_selectedTab.left') < currentOffset) {
-      let newOffset = this.get('_selectedTab.left');
-      this.set('currentOffset', newOffset);
-      this.set('paginationStyle', htmlSafe(`transform: translate3d(-${newOffset}px, 0px, 0px);`));
+    if (newOffset === currentOffset) {
+      return;
     }
+
+    this.set('currentOffset', newOffset);
+    this.set('paginationStyle', htmlSafe(`transform: translate3d(-${newOffset}px, 0px, 0px);`));
   },
 
   updateDimensions() {
@@ -129,6 +154,10 @@ export default Component.extend(ParentMixin, ColorMixin, {
     this.get('childComponents').invoke('updateDimensions');
     this.set('canvasWidth', canvasWidth);
     this.set('wrapperWidth', wrapperWidth);
+
+    if (wrapperWidth > canvasWidth) {
+      this.set('shouldPaginate', true);
+    }
   },
 
   updateStretchTabs() {
@@ -178,7 +207,7 @@ export default Component.extend(ParentMixin, ColorMixin, {
     onChange(selected) {
       // support non DDAU scenario
       if (this.get('onChange')) {
-        this.sendAction('onChange', selected.get('value'));
+        invokeAction(this, 'onChange', selected.get('value'));
       } else {
         this.set('selected', selected.get('value'));
       }

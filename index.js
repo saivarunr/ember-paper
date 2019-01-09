@@ -3,15 +3,375 @@
 const path = require('path');
 const resolve = require('resolve');
 const version = require('./package.json').version;
-const autoprefixer = require('broccoli-autoprefixer');
 const BroccoliMergeTrees = require('broccoli-merge-trees');
 const writeFile = require('broccoli-file-creator');
 const Funnel = require('broccoli-funnel');
 const AngularScssFilter = require('./lib/angular-scss-filter');
 const fastbootTransform = require('fastboot-transform');
 
+/**
+ * Component dependencies, extracted from ember-bootstrap
+ * https://github.com/kaliber5/ember-bootstrap/blob/master/index.js
+*/
+const componentDependencies = {
+  'paper-autocomplete': {
+    styles: [
+      'components/autocomplete/autocomplete.scss',
+      'components/autocomplete/autocomplete-theme.scss'
+    ],
+    dependencies: [
+      'paper-autocomplete-trigger',
+      'paper-autocomplete-options',
+      'paper-autocomplete-highlight',
+      'paper-autocomplete-content'
+    ]
+  },
+  'paper-autocomplete-content': {
+    dependencies: [
+      'paper-virtual-repeat'
+    ]
+  },
+  'paper-autocomplete-trigger': {
+    dependencies: [
+      'paper-progress-linear',
+      'paper-input',
+      'paper-reset-button',
+      'paper-icon'
+    ]
+  },
+  'paper-backdrop': {
+    styles: [
+      'components/backdrop/backdrop.scss',
+      'components/backdrop/backdrop-theme.scss'
+    ]
+  },
+  'paper-button': {
+    styles: [
+      'components/button/button.scss',
+      'components/button/button-theme.scss'
+    ]
+  },
+  'paper-card': {
+    styles: [
+      'components/card/card.scss',
+      'components/card/card-theme.scss'
+    ],
+    dependencies: [
+      'paper-card-title',
+      'paper-card-content',
+      'paper-card-actions',
+      'paper-card-header',
+      'paper-card-image',
+      'paper-card-media'
+    ]
+  },
+  'paper-card-actions': {
+    dependencies: [
+      'paper-card-icon-actions'
+    ]
+  },
+  'paper-card-title': {
+    dependencies: [
+      'paper-card-title-text',
+      'paper-card-title-media'
+    ]
+  },
+  'paper-card-title-text': {
+    dependencies: [
+      'paper-card-header-headline',
+      'paper-card-header-subhead'
+    ]
+  },
+  'paper-card-header': {
+    dependencies: [
+      'paper-card-header-text',
+      'paper-card-avatar'
+    ]
+  },
+  'paper-card-header-text': {
+    dependencies: [
+      'paper-card-header-title',
+      'paper-card-header-subhead'
+    ]
+  },
+  'paper-checkbox': {
+    styles: [
+      'components/checkbox/checkbox.scss',
+      'components/checkbox/checkbox-theme.scss'
+    ]
+  },
+  'paper-chips': {
+    styles: [
+      'components/chips/chips.scss',
+      'components/chips/chips-theme.scss'
+    ],
+    dependencies: [
+      'paper-autocomplete',
+      'paper-icon'
+    ]
+  },
+  'paper-contact-chips': {
+    dependencies: [
+      'paper-chips'
+    ]
+  },
+  'paper-content': {
+    styles: [
+      'components/content/content.scss',
+      'components/content/content-theme.scss'
+    ]
+  },
+  'paper-dialog': {
+    styles: [
+      'components/dialog/dialog.scss',
+      'components/dialog/dialog-theme.scss'
+    ],
+    dependencies: [
+      'paper-dialog-actions',
+      'paper-backdrop',
+      'paper-dialog-container',
+      'paper-dialog-content',
+      'paper-dialog-inner'
+    ]
+  },
+  'paper-divider': {
+    styles: [
+      'components/divider/divider.scss',
+      'components/divider/divider-theme.scss'
+    ]
+  },
+  'paper-form': {
+    dependencies: [
+      'paper-input',
+      'paper-select',
+      'paper-autocomplete',
+      'paper-button'
+    ]
+  },
+  'paper-grid-list': {
+    styles: [
+      'components/gridList/grid-list.scss'
+    ],
+    dependencies: [
+      'paper-grid-tile'
+    ]
+  },
+  'paper-grid-tile': {
+    dependencies: [
+      'paper-grid-tile-footer'
+    ]
+  },
+  'paper-icon': {
+    styles: [
+      'components/icon/icon.scss',
+      'components/icon/icon-theme.scss'
+    ]
+  },
+  'paper-input': {
+    styles: [
+      'components/input/input.scss',
+      'components/input/input-theme.scss'
+    ]
+  },
+  'paper-item': {
+    dependencies: [
+      'paper-checkbox',
+      'paper-button',
+      'paper-switch',
+      'paper-radio-proxiable'
+    ]
+  },
+  'paper-list': {
+    styles: [
+      'components/list/list.scss',
+      'components/list/list-theme.scss'
+    ]
+  },
+  'paper-radio-proxiable': {
+    dependencies: [
+      'paper-radio-base'
+    ]
+  },
+  'paper-menu': {
+    styles: [
+      'components/menu/menu.scss',
+      'components/menu/menu-theme.scss'
+    ],
+    dependencies: [
+      'paper-menu-content'
+    ]
+  },
+  'paper-menu-content': {
+    dependencies: [
+      'paper-menu-content-inner',
+      'paper-backdrop'
+    ]
+  },
+  'paper-menu-content-inner': {
+    dependencies: [
+      'paper-menu-item'
+    ]
+  },
+  'paper-menu-item': {
+    dependencies: [
+      'paper-button'
+    ]
+  },
+  'paper-progress-circular': {
+    styles: [
+      'components/progressCircular/progress-circular.scss',
+      'components/progressCircular/progress-circular-theme.scss'
+    ]
+  },
+  'paper-progress-linear': {
+    styles: [
+      'components/progressLinear/progress-linear.scss',
+      'components/progressLinear/progress-linear-theme.scss'
+    ]
+  },
+  'paper-radio': {
+    dependencies: [
+      'paper-radio-base'
+    ]
+  },
+  'paper-radio-base': {
+    styles: [
+      'components/radioButton/radio-button.scss',
+      'components/radioButton/radio-button-theme.scss'
+    ]
+  },
+  'paper-radio-group': {
+    dependencies: [
+      'paper-radio'
+    ]
+  },
+  'paper-select': {
+    styles: [
+      'components/select/select.scss',
+      'components/select/select-theme.scss'
+    ],
+    dependencies: [
+      'paper-select-menu',
+      'paper-select-options',
+      'paper-select-trigger',
+      'paper-select-search'
+    ]
+  },
+  'paper-select-options': {
+    dependencies: [
+      'paper-option'
+    ]
+  },
+  'paper-select-menu': {
+    dependencies: [
+      'paper-select-menu-trigger',
+      'paper-select-content'
+    ]
+  },
+  'paper-select-content': {
+    dependencies: [
+      'paper-backdrop',
+      'paper-select-menu-inner'
+    ]
+  },
+  'paper-sidenav': {
+    styles: [
+      'components/sidenav/sidenav.scss',
+      'components/sidenav/sidenav-theme.scss'
+    ],
+    dependencies: [
+      'paper-backdrop',
+      'paper-sidenav-inner'
+    ]
+  },
+  'paper-slider': {
+    styles: [
+      'components/slider/slider.scss',
+      'components/slider/slider-theme.scss'
+    ]
+  },
+  'paper-speed-dial': {
+    styles: [
+      'components/fabSpeedDial/fabSpeedDial.scss'
+    ],
+    dependencies: [
+      'paper-speed-dial-trigger',
+      'paper-speed-dial-actions'
+    ]
+  },
+  'paper-subheader': {
+    styles: [
+      'components/subheader/subheader.scss',
+      'components/subheader/subheader-theme.scss'
+    ]
+  },
+  'paper-speed-dial-actions': {
+    dependencies: [
+      'paper-speed-dial-actions-action'
+    ]
+  },
+  'paper-switch': {
+    styles: [
+      'components/switch/switch.scss',
+      'components/switch/switch-theme.scss'
+    ]
+  },
+  'paper-tabs': {
+    styles: [
+      'components/tabs/tabs.scss',
+      'components/tabs/tabs-theme.scss'
+    ],
+    dependencies: [
+      'paper-tab',
+      'paper-ink-bar',
+      'paper-icon'
+    ]
+  },
+  'paper-toast': {
+    styles: [
+      'components/toast/toast.scss',
+      'components/toast/toast-theme.scss'
+    ],
+    dependencies: [
+      'paper-toast-inner',
+      'paper-toast-text'
+    ]
+  },
+  'paper-toaster': {
+    dependencies: [
+      'paper-toast',
+      'paper-button'
+    ]
+  },
+  'paper-toolbar': {
+    styles: [
+      'components/toolbar/toolbar.scss',
+      'components/toolbar/toolbar-theme.scss'
+    ],
+    dependencies: [
+      'paper-toolbar-tools'
+    ]
+  },
+  'paper-tooltip': {
+    styles: [
+      'components/tooltip/tooltip.scss',
+      'components/tooltip/tooltip-theme.scss'
+    ],
+    dependencies: [
+      'paper-tooltip-inner'
+    ]
+  },
+  'paper-virtual-repeat': {
+    styles: [
+      'components/virtualRepeat/virtual-repeater.scss'
+    ],
+    dependencies: [
+      'paper-virtual-repeat-scroller'
+    ]
+  }
+};
 module.exports = {
-  name: 'ember-paper',
+  name: require('./package').name,
 
   included() {
     this._super.included.apply(this, arguments);
@@ -30,21 +390,42 @@ module.exports = {
       } while (current.parent.parent && (current = current.parent));
     }
 
+    this.emberPaperOptions = Object.assign({}, app.options['ember-paper']);
+
     app.import('vendor/ember-paper/register-version.js');
     app.import('vendor/hammerjs/hammer.js');
-    app.import('vendor/matchmedia-polyfill/matchMedia.js');
     app.import('vendor/propagating-hammerjs/propagating.js');
+
   },
 
   config() {
-    return { 'ember-paper': { insertFontLinks: true } };
+    return {
+      'ember-paper': {
+        insertFontLinks: true
+      }
+    };
   },
 
   contentFor(type, config) {
+
     if (type === 'head') {
+
       if (config['ember-paper'].insertFontLinks) {
-        return '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">'
-          + '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">';
+
+        let whitelist = this.emberPaperOptions.whitelist || [];
+        let blacklist = this.emberPaperOptions.blacklist || [];
+
+        let links = '<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,400italic">';
+
+        let paperIconNotWhitelisted = whitelist.length && !whitelist.includes('paper-icon');
+        let paperIconBlacklisted = blacklist.length && blacklist.includes('paper-icon');
+
+        if (paperIconNotWhitelisted || paperIconBlacklisted) {
+          return links;
+        }
+
+        return `${links} <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">`;
+
       }
     } else if (type === 'body-footer') {
       let response = null;
@@ -77,17 +458,12 @@ module.exports = {
       destDir: 'hammerjs'
     }));
 
-    let matchMediaPolyfill = fastbootTransform(new Funnel(this.pathBase('matchmedia-polyfill'), {
-      files: ['matchMedia.js'],
-      destDir: 'matchmedia-polyfill'
-    }));
-
     let propagatingHammerJs = fastbootTransform(new Funnel(this.pathBase('propagating-hammerjs'), {
       files: ['propagating.js'],
       destDir: 'propagating-hammerjs'
     }));
 
-    trees = trees.concat([hammerJs, matchMediaPolyfill, propagatingHammerJs, versionTree]);
+    trees = trees.concat([hammerJs, propagatingHammerJs, versionTree]);
 
     if (tree) {
       trees.push(tree);
@@ -97,115 +473,43 @@ module.exports = {
   },
 
   treeForStyles(tree) {
-    let scssFiles = [
+    let coreScssFiles = [
       // core styles
-      'core/style/typography.scss',
       'core/style/mixins.scss',
       'core/style/variables.scss',
       'core/style/structure.scss',
+      'core/style/typography.scss',
       'core/style/layout.scss',
       'core/services/layout/layout.scss',
 
-      // component styles
-      'components/content/content.scss',
-      'components/content/content-theme.scss',
-
-      'components/card/card.scss',
-      'components/card/card-theme.scss',
-
-      'components/button/button.scss',
-      'components/button/button-theme.scss',
-
-      'components/checkbox/checkbox.scss',
-      'components/checkbox/checkbox-theme.scss',
-
-      'components/radioButton/radio-button.scss',
-      'components/radioButton/radio-button-theme.scss',
-
-      'components/switch/switch.scss',
-      'components/switch/switch-theme.scss',
-
-      'components/input/input.scss',
-      'components/input/input-theme.scss',
-
-      'components/list/list.scss',
-      'components/list/list-theme.scss',
-
-      'components/divider/divider.scss',
-      'components/divider/divider-theme.scss',
-
-      'components/whiteframe/whiteframe.scss',
-
-      'components/toolbar/toolbar.scss',
-      'components/toolbar/toolbar-theme.scss',
-
-      'components/icon/icon.scss',
-      'components/icon/icon-theme.scss',
-
-      'components/slider/slider.scss',
-      'components/slider/slider-theme.scss',
-
-      'components/subheader/subheader.scss',
-      'components/subheader/subheader-theme.scss',
-
-      'components/autocomplete/autocomplete.scss',
-      'components/autocomplete/autocomplete-theme.scss',
-
-      'components/progressLinear/progress-linear.scss',
-      'components/progressLinear/progress-linear-theme.scss',
-
-      'components/progressCircular/progress-circular.scss',
-      'components/progressCircular/progress-circular-theme.scss',
-
+      // TODO: Move to core, if we don't import menu, it breaks.
       'components/menu/menu.scss',
       'components/menu/menu-theme.scss',
 
-      'components/select/select.scss',
-      'components/select/select-theme.scss',
-
-      'components/gridList/grid-list.scss',
-
-      'components/sidenav/sidenav.scss',
-      'components/sidenav/sidenav-theme.scss',
-
-      'components/backdrop/backdrop.scss',
-      'components/backdrop/backdrop-theme.scss',
-
-      'components/dialog/dialog.scss',
-      'components/dialog/dialog-theme.scss',
-
-      'components/virtualRepeat/virtual-repeater.scss',
-
-      'components/chips/chips.scss',
-      'components/chips/chips-theme.scss',
+      // Need to find which components rely on this, otherwise, move to core.
+      'components/whiteframe/whiteframe.scss',
 
       'components/panel/panel.scss',
-      'components/panel/panel-theme.scss',
-
-      'components/tooltip/tooltip.scss',
-      'components/tooltip/tooltip-theme.scss',
-
-      'components/toast/toast.scss',
-      'components/toast/toast-theme.scss',
-
-      'components/tabs/tabs.scss',
-      'components/tabs/tabs-theme.scss',
-
-      'components/fabSpeedDial/fabSpeedDial.scss'
+      'components/panel/panel-theme.scss'
     ];
 
+    let filteredScssFiles = this.addStyles(coreScssFiles) || coreScssFiles;
+
     let angularScssFiles = new Funnel(this.pathBase('angular-material-source'), {
-      files: scssFiles,
+      files: filteredScssFiles,
       srcDir: '/src',
       destDir: 'angular-material',
       annotation: 'AngularScssFunnel'
     });
 
-    angularScssFiles = new AngularScssFilter(angularScssFiles, {
-      annotation: 'AngularScssFilter'
-    });
+    angularScssFiles = new AngularScssFilter(angularScssFiles);
 
-    let mergedTrees = new BroccoliMergeTrees([angularScssFiles, tree], { overwrite: true });
+    let importer = writeFile(
+      'ember-paper-components.scss',
+      filteredScssFiles.map((path) => `@import './angular-material/${path}';`).join('\n')
+    );
+
+    let mergedTrees = new BroccoliMergeTrees([angularScssFiles, importer, tree], { overwrite: true });
     return this._super.treeForStyles(mergedTrees);
   },
 
@@ -219,16 +523,145 @@ module.exports = {
     does not have such a hack for the same reason.
 
     tl;dr - We want the non built scss files, and b/c this dep is only provided via
-    bower, we use this hack. Please change it if you read this and know a better way.
+    git, we use this hack. Please change it if you read this and know a better way.
   */
   pathBase(packageName) {
     return path.dirname(resolve.sync(`${packageName}/package.json`, { basedir: __dirname }));
   },
 
-  postprocessTree(type, tree) {
-    if (type === 'all' || type === 'styles') {
-      tree = autoprefixer(tree, this.app.options.autoprefixer || { browsers: ['last 2 versions'] });
+  treeForApp(tree) {
+    tree = this.filterComponents(tree);
+    return this._super.treeForApp.call(this, tree);
+  },
+
+  treeForAddon(tree) {
+    tree = this.filterComponents(tree);
+    return this._super.treeForAddon.call(this, tree);
+  },
+
+  treeForAddonTemplates(tree) {
+    tree = this.filterComponents(tree);
+    return this._super.treeForAddonTemplates.call(this, tree);
+  },
+
+  /**
+   * This function will push styles using whitelist and blacklist
+   * @param {Array} core - The core scss files
+   * @return {Array} - New array with styles appended
+   */
+  addStyles(core = []) {
+
+    let whitelist = this.generateWhitelist(this.emberPaperOptions.whitelist);
+    let blacklist = this.emberPaperOptions.blacklist || [];
+
+    let styles = core.slice();
+
+    // add everything if no opts defined
+    if (whitelist.length === 0 && blacklist.length === 0) {
+      Object.keys(componentDependencies).forEach((key) => {
+        this.addComponentStyle(styles, componentDependencies[key]);
+      });
     }
-    return tree;
+
+    // build array from whitelist
+    if (whitelist.length && blacklist.length === 0) {
+      whitelist.forEach((component) => {
+        this.addComponentStyle(styles, componentDependencies[component]);
+      });
+    }
+
+    // add all but blacklisted
+    if (blacklist.length && whitelist.length === 0) {
+      Object.keys(componentDependencies).forEach((key) => {
+        if (!blacklist.includes(key)) {
+          this.addComponentStyle(styles, componentDependencies[key]);
+        }
+      });
+    }
+
+    return styles;
+
+  },
+
+  /**
+   * Validate if the object exists in componentDependencies and has any styles
+   * if so, add them to the arr
+   *
+   * @param {Array} arr - Styles array
+   * @param {Object} component - componentDependencies[key]
+   */
+  addComponentStyle(arr, component) {
+    if (component && component.styles) {
+      component.styles.forEach((scss) => {
+        if (!arr.includes(scss)) {
+          arr.push(scss);
+        }
+      });
+    }
+
+  },
+
+  filterComponents(tree) {
+    let whitelist = this.generateWhitelist(this.emberPaperOptions.whitelist);
+    let blacklist = this.emberPaperOptions.blacklist || [];
+
+    // exit early if no opts defined
+    if (whitelist.length === 0 && blacklist.length === 0) {
+      return tree;
+    }
+
+    return new Funnel(tree, {
+      exclude: [(name) => this.excludeComponent(name, whitelist, blacklist)]
+    });
+  },
+
+  excludeComponent(name, whitelist, blacklist) {
+    let regex = /^(templates\/)?components\/(base\/)?/;
+    let isComponent = regex.test(name);
+    if (!isComponent) {
+      return false;
+    }
+
+    let baseName = name.replace(regex, '');
+    let firstSeparator = baseName.indexOf('/');
+    if (firstSeparator !== -1) {
+      baseName = baseName.substring(0, firstSeparator);
+    } else {
+      baseName = baseName.substring(0, baseName.lastIndexOf('.'));
+    }
+
+    let isWhitelisted = whitelist.indexOf(baseName) !== -1;
+    let isBlacklisted = blacklist.indexOf(baseName) !== -1;
+
+    if (whitelist.length === 0 && blacklist.length === 0) {
+      return false;
+    }
+
+    if (whitelist.length && blacklist.length === 0) {
+      return !isWhitelisted;
+    }
+
+    return isBlacklisted;
+  },
+
+  generateWhitelist(whitelist) {
+    let list = [];
+
+    if (!whitelist) {
+      return list;
+    }
+
+    function _addToWhitelist(item) {
+      if (list.indexOf(item) === -1) {
+        list.push(item);
+
+        if (componentDependencies[item] && componentDependencies[item].dependencies) {
+          componentDependencies[item].dependencies.forEach(_addToWhitelist);
+        }
+      }
+    }
+
+    whitelist.forEach(_addToWhitelist);
+    return list;
   }
 };

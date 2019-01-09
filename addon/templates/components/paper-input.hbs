@@ -1,5 +1,5 @@
 {{#if label}}
-  <label for={{inputElementId}} class="{{if required "md-required"}}">{{label}}</label>
+  <label for={{inputElementId}} class={{if required "md-required"}}>{{label}}</label>
 {{/if}}
 
 {{#if icon}}
@@ -10,9 +10,10 @@
   <textarea
     class="md-input {{if isInvalid "ng-invalid"}} {{if isTouched "ng-dirty"}}"
     id={{inputElementId}}
-    placeholder={{placeholder}}
+    placeholder={{if shouldAddPlaceholder placeholder}}
     disabled={{disabled}}
     autofocus={{autofocus}}
+    aria-describedby={{concat elementId "-char-count " elementId "-error-messages"}}
     onfocus={{onFocus}}
     onblur={{action "handleBlur"}}
     onkeydown={{onKeyDown}}
@@ -25,6 +26,7 @@
     cols={{passThru.cols}}
     maxlength={{passThru.maxlength}}
     tabindex={{passThru.tabindex}}
+    title={{title}}
     required={{passThru.required}}
     selectionEnd={{passThru.selectionEnd}}
     selectionStart={{passThru.selectionStart}}
@@ -37,10 +39,11 @@
   <input
     class="md-input {{if isInvalid "ng-invalid"}}  {{if isTouched "ng-dirty"}}"
     id={{inputElementId}}
-    placeholder={{placeholder}}
+    placeholder={{if shouldAddPlaceholder placeholder}}
     type={{type}}
     disabled={{disabled}}
     autofocus={{autofocus}}
+    aria-describedby={{concat elementId "-char-count " elementId "-error-messages"}}
     onfocus={{onFocus}}
     onblur={{action "handleBlur"}}
     onkeydown={{onKeyDown}}
@@ -74,17 +77,18 @@
     spellcheck={{passThru.spellcheck}}
     step={{passThru.step}}
     tabindex={{passThru.tabindex}}
+    title={{title}}
     width={{passThru.width}}>
 {{/if}}
 
 {{#unless hideAllMessages}}
-  <div class="md-errors-spacer">
+  <div class="md-errors-spacer" id={{concat elementId "-char-count"}}>
     {{#if maxlength}}
       <div class="md-char-counter">{{renderCharCount}}</div>
     {{/if}}
   </div>
   {{#if isInvalidAndTouched}}
-    <div class="md-input-messages-animation md-auto-hide">
+    <div class="md-input-messages-animation md-auto-hide" id={{concat elementId "-error-messages"}}>
       {{#each validationErrorMessages as |error index|}}
         <div id="error-{{inputElementId}}-{{index}}"
         class="paper-input-error ng-enter ng-enter-active md-input-message-animation"

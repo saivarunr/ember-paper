@@ -1,6 +1,6 @@
 import { module, test } from 'qunit';
 import { setupRenderingTest } from 'ember-qunit';
-import { render } from '@ember/test-helpers';
+import { render, click } from '@ember/test-helpers';
 import hbs from 'htmlbars-inline-precompile';
 
 module('Integration | Component | paper radio', function(hooks) {
@@ -18,10 +18,10 @@ module('Integration | Component | paper radio', function(hooks) {
         Radio button 2
       {{/paper-radio}}
     `);
-    assert.ok(this.$('md-radio-button').hasClass('md-checked'));
+    assert.dom('md-radio-button').hasClass('md-checked');
 
     this.set('groupValue', null);
-    assert.ok(!this.$('md-radio-button').hasClass('md-checked'));
+    assert.dom('md-radio-button').doesNotHaveClass('md-checked');
   });
 
   test('should trigger an action when checking', async function(assert) {
@@ -40,7 +40,8 @@ module('Integration | Component | paper radio', function(hooks) {
       {{/paper-radio}}
     `);
 
-    this.$('md-radio-button').first().click();
+    await click('md-radio-button:first-child');
+
   });
 
   test('should trigger an action when unchecking (toggle is true)', async function(assert) {
@@ -57,7 +58,7 @@ module('Integration | Component | paper radio', function(hooks) {
       {{/paper-radio}}
     `);
 
-    this.$('md-radio-button').click();
+    await click('md-radio-button');
   });
 
   test('shouldn\'t trigger an action when disabled', async function(assert) {
@@ -73,7 +74,7 @@ module('Integration | Component | paper radio', function(hooks) {
       {{/paper-radio}}
     `);
 
-    this.$('md-radio-button').click();
+    await click('md-radio-button');
   });
 
   test('blockless version should set label inside', async function(assert) {
@@ -81,7 +82,7 @@ module('Integration | Component | paper radio', function(hooks) {
 
     await render(hbs`{{paper-radio value="1" onChange=(action (mut value)) label="çup?"}}`);
 
-    assert.equal(this.$('.md-label > span').text().trim(), 'çup?');
+    assert.dom('.md-label > span').hasText('çup?');
   });
 
   test('block version should set label inside', async function(assert) {
@@ -93,7 +94,7 @@ module('Integration | Component | paper radio', function(hooks) {
       {{/paper-radio}}
     `);
 
-    assert.equal(this.$('.md-label > span').text().trim(), 'çup?');
+    assert.dom('.md-label > span').hasText('çup?');
   });
 
   /* test('the `onChange` action is mandatory for paper-radio', function(assert) {
@@ -103,4 +104,36 @@ module('Integration | Component | paper radio', function(hooks) {
       this.render(hbs`{{paper-radio value="1"}}`);
     }, /requires an `onChange` action/);
   });*/
+
+  test('it has role attribute', async function(assert) {
+    assert.expect(1);
+
+    await render(hbs`
+      {{paper-radio onChange=null}}
+    `);
+
+    assert.dom('md-radio-button').hasAttribute('role');
+  });
+
+  test('it correctly sets aria-checked attribute', async function(assert) {
+    assert.expect(2);
+
+    this.set('groupValue', null);
+
+    await render(hbs`{{paper-radio value="1" groupValue=groupValue onChange=null}}`);
+
+    assert.dom('md-radio-button').hasAttribute('aria-checked', 'false');
+
+    this.set('groupValue', '1');
+
+    assert.dom('md-radio-button').hasAttribute('aria-checked', 'true');
+  });
+
+  test('it sets aria-label when ariaLabel is passed', async function(assert) {
+    assert.expect(1);
+
+    await render(hbs`{{paper-radio onChange=null ariaLabel="first radio button"}}`);
+
+    assert.dom('md-radio-button').hasAttribute('aria-label', 'first radio button');
+  });
 });

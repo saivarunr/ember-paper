@@ -5,21 +5,28 @@ import layout from '../templates/components/paper-tab';
 import { ChildMixin } from 'ember-composability-tools';
 import RippleMixin from 'ember-paper/mixins/ripple-mixin';
 import FocusableMixin from 'ember-paper/mixins/focusable-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 export default Component.extend(ChildMixin, RippleMixin, FocusableMixin, {
   layout,
   tagName: 'md-tab-item',
   classNames: ['md-tab'],
   classNameBindings: ['isSelected:md-active'],
-  attributeBindings: ['isSelected:aria-selected', 'href', 'style'],
+  attributeBindings: ['isSelected:aria-selected', 'style', 'maybeHref:href'],
 
   rippleContainerSelector: null,
 
-  // <a> tags have brower styles or are usually styled by the user
+  // <a> tags have browser styles or are usually styled by the user
   // this makes sure that tab item still looks good with an anchor tag
   style: computed('href', function() {
     if (this.get('href')) {
       return htmlSafe('text-decoration: none; border: none;');
+    }
+  }),
+
+  maybeHref: computed('href', 'disabled', function() {
+    if (this.get('href') && !this.get('disabled')) {
+      return this.get('href');
     }
   }),
 
@@ -57,7 +64,9 @@ export default Component.extend(ChildMixin, RippleMixin, FocusableMixin, {
   },
 
   click() {
-    this.sendAction('onClick', ...arguments);
-    this.sendAction('onSelect', this);
+    if (!this.get('disabled')) {
+      invokeAction(this, 'onClick', ...arguments);
+      invokeAction(this, 'onSelect', this);
+    }
   }
 });

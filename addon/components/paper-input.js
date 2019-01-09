@@ -4,7 +4,6 @@
 import { or, bool, and } from '@ember/object/computed';
 
 import Component from '@ember/component';
-import $ from 'jquery';
 import { computed } from '@ember/object';
 import { isEmpty } from '@ember/utils';
 import { run } from '@ember/runloop';
@@ -14,6 +13,7 @@ import FocusableMixin from 'ember-paper/mixins/focusable-mixin';
 import ColorMixin from 'ember-paper/mixins/color-mixin';
 import ChildMixin from 'ember-paper/mixins/child-mixin';
 import ValidationMixin from 'ember-paper/mixins/validation-mixin';
+import { invokeAction } from 'ember-invoke-action';
 
 /**
  * @class PaperInput
@@ -52,6 +52,11 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
     return !isEmpty(value) || isNativeInvalid;
   }),
 
+  shouldAddPlaceholder: computed('label', 'focused', function() {
+    // if has label, only add placeholder when focused
+    return isEmpty(this.get('label')) || this.get('focused');
+  }),
+
   inputElementId: computed('elementId', function() {
     return `input-${this.get('elementId')}`;
   }),
@@ -71,13 +76,21 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
   didReceiveAttrs() {
     this._super(...arguments);
     assert('{{paper-input}} requires an `onChange` action or null for no action.', this.get('onChange') !== undefined);
-    this.notifyValidityChange();
+
+    let { value, errors } = this.getProperties('value', 'errors');
+    let { _prevValue, _prevErrors } = this.getProperties('_prevValue', '_prevErrors');
+    if (value !== _prevValue || errors !== _prevErrors) {
+      this.notifyValidityChange();
+    }
+    this._prevValue = value;
+    this._prevErrors = errors;
   },
 
   didInsertElement() {
     this._super(...arguments);
     if (this.get('textarea')) {
-      $(window).on(`resize.${this.elementId}`, run.bind(this, this.growTextarea));
+      this._growTextareaOnResize = run.bind(this, this.growTextarea);
+      window.addEventListener('resize', this._growTextareaOnResize);
     }
   },
 
@@ -91,22 +104,24 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
   willDestroyElement() {
     this._super(...arguments);
     if (this.get('textarea')) {
-      $(window).off(`resize.${this.elementId}`);
+      window.removeEventListener('resize', this._growTextareaOnResize);
+      this._growTextareaOnResize = null;
     }
   },
 
   growTextarea() {
     if (this.get('textarea')) {
-      let inputElement = this.$('input, textarea');
-      inputElement.addClass('md-no-flex').attr('rows', 1);
+      let inputElement = this.element.querySelector('input, textarea');
+      inputElement.classList.add('md-no-flex');
+      inputElement.setAttribute('rows', 1);
 
       let minRows = this.get('passThru.rows');
       let height = this.getHeight(inputElement);
       if (minRows) {
         if (!this.lineHeight) {
-          inputElement.get(0).style.minHeight = 0;
-          this.lineHeight = inputElement.get(0).clientHeight;
-          inputElement.get(0).style.minHeight = null;
+          inputElement.style.minHeight = 0;
+          this.lineHeight = inputElement.clientHeight;
+          inputElement.style.minHeight = null;
         }
         if (this.lineHeight) {
           height = Math.max(height, this.lineHeight * minRows);
@@ -114,38 +129,47 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
         let proposedHeight = Math.round(height / this.lineHeight);
         let maxRows = this.get('passThru.maxRows') || Number.MAX_VALUE;
         let rowsToSet = Math.min(proposedHeight, maxRows);
-        inputElement
-          .css('height', `${this.lineHeight * rowsToSet}px`)
-          .attr('rows', rowsToSet)
-          .toggleClass('md-textarea-scrollable', proposedHeight >= maxRows);
+
+        inputElement.style.height = `${this.lineHeight * rowsToSet}px`;
+        inputElement.setAttribute('rows', rowsToSet);
+
+        if (proposedHeight >= maxRows) {
+          inputElement.classList.add('md-textarea-scrollable');
+        } else {
+          inputElement.classList.remove('md-textarea-scrollable');
+        }
+
       } else {
-        inputElement.css('height', 'auto');
-        inputElement.get(0).scrollTop = 0;
+        inputElement.style.height = 'auto';
+        inputElement.scrollTop = 0;
         let height = this.getHeight(inputElement);
         if (height) {
-          inputElement.css('height', `${height}px`);
+          inputElement.style.height = `${height}px`;
         }
       }
 
-      inputElement.removeClass('md-no-flex');
+      inputElement.classList.remove('md-no-flex');
     }
   },
 
   getHeight(inputElement) {
-    let { offsetHeight } = inputElement.get(0);
-    let line = inputElement.get(0).scrollHeight - offsetHeight;
+    let { offsetHeight } = inputElement;
+    let line = inputElement.scrollHeight - offsetHeight;
     return offsetHeight + (line > 0 ? line : 0);
   },
 
   setValue(value) {
-    if (this.$('input, textarea').val() !== value) {
-      this.$('input, textarea').val(value);
+    // normalize falsy values to empty string
+    value = isEmpty(value) ? '' : value;
+
+    if (this.element.querySelector('input, textarea').value !== value) {
+      this.element.querySelector('input, textarea').value = value;
     }
   },
 
   actions: {
     handleInput(e) {
-      this.sendAction('onChange', e.target.value);
+      invokeAction(this, 'onChange', e.target.value);
       // setValue below ensures that the input value is the same as this.value
       run.next(() => {
         if (this.isDestroyed) {
@@ -154,13 +178,13 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
         this.setValue(this.get('value'));
       });
       this.growTextarea();
-      let inputElement = this.$('input').get(0);
+      let inputElement = this.element.querySelector('input');
       this.set('isNativeInvalid', inputElement && inputElement.validity && inputElement.validity.badInput);
       this.notifyValidityChange();
     },
 
     handleBlur(e) {
-      this.sendAction('onBlur', e);
+      invokeAction(this, 'onBlur', e);
       this.set('isTouched', true);
       this.notifyValidityChange();
     }

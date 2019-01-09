@@ -1,8 +1,6 @@
 /**
  * @module ember-paper
  */
-import { inject as service } from '@ember/service';
-
 import { alias } from '@ember/object/computed';
 import { assert } from '@ember/debug';
 import { isNone } from '@ember/utils';
@@ -22,8 +20,6 @@ export default PowerSelect.extend(ValidationMixin, ChildMixin, {
   layout,
   calculatePosition,
 
-  util: service(),
-  constants: service(),
   triggerComponent: 'paper-autocomplete-trigger',
   contentComponent: 'paper-autocomplete-content',
   optionsComponent: 'paper-autocomplete-options',
@@ -56,6 +52,12 @@ export default PowerSelect.extend(ValidationMixin, ChildMixin, {
     return classes.join(' ');
   }),
 
+  _onInput(value) {
+    let handler = this.get('onSearchTextChange') || ((v) => this.set('searchText', v));
+    handler(...arguments);
+    return value;
+  },
+
   init() {
     this._initComponent();
     this._super(...arguments);
@@ -74,8 +76,8 @@ export default PowerSelect.extend(ValidationMixin, ChildMixin, {
     assert('{{paper-autocomplete}} requires at least one of the `onSelectionChange` or `onSearchTextChange` functions to be provided.', hasTextChange || hasSelectionChange);
 
     let aliasOnChangeDepKey = hasSelectionChange ? 'onSelectionChange' : '_onChangeNop';
-    defineProperty(this, 'oninput', alias('onSearchTextChange'));
     defineProperty(this, 'onchange', alias(aliasOnChangeDepKey));
+    this.oninput = this._onInput.bind(this);
   },
 
   // Choose highlighted item on key tab
@@ -86,6 +88,22 @@ export default PowerSelect.extend(ValidationMixin, ChildMixin, {
     }
     // e-p-s will close
     this._super(...arguments);
+  },
+
+  didReceiveAttrs() {
+    let searchText = this.get('searchText');
+    if (searchText !== this.get('publicAPI.searchText')) {
+      let publicAPI = this.get('publicAPI');
+      if (publicAPI && publicAPI.actions) {
+        publicAPI.actions.search(searchText);
+      }
+    }
+    this._super(...arguments);
+  },
+
+  updateSelection() {
+    this._super(...arguments);
+    this.notifyValidityChange();
   },
 
   actions: {
