@@ -22,7 +22,7 @@ export default Controller.extend({
 
   chapters: computed(function() {
     let tabs = A();
-    for (let i = 1; i < 5; i++) {
+    for (let i = 1; i < 50; i++) {
       tabs.push({
         index: i,
         title: `Chapter ${i}`,
