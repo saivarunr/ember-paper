@@ -1,5 +1,23 @@
 # Ember Paper Changelog
 
+### master
+- [#1073](https://github.com/miguelcobain/ember-paper/issues/1073) fixed paper-autocomplete options highlighting style
+
+### 1.0.0-beta.24
+- [#1048](https://github.com/miguelcobain/ember-paper/pull/1048) fix paper-tabs issues (fixes [#858](https://github.com/miguelcobain/ember-paper/issues/858), [#759](https://github.com/miguelcobain/ember-paper/issues/759), [#893](https://github.com/miguelcobain/ember-paper/issues/893))
+- [6a1fff3](https://github.com/miguelcobain/ember-paper/commit/6a1fff377059a6e396ae0af28d46a38febd3a2b3) depend on `angular-material-styles` npm package instead of `angular-material-source` git dependency (fixes [#1069](https://github.com/miguelcobain/ember-paper/issues/1069))
+
+### 1.0.0-beta.23
+- [#1050](https://github.com/miguelcobain/ember-paper/pull/1050) Fix paper select click-catcher to call dropdown.actions.close on click
+- [55858e8](https://github.com/miguelcobain/ember-paper/commit/55858e8d7a94106c4d88fe1969276c075e136cf9) add nodelist forEach polyfill to fix paper-dialogs on IE11  (fixes [1058](https://github.com/miguelcobain/ember-paper/issues/1058))
+- [#1064](https://github.com/miguelcobain/ember-paper/pull/1064) support module unification blueprint
+- [ebbeaef](https://github.com/miguelcobain/ember-paper/commit/ebbeaefc10687aa76cd667da5a65bda6b6c8639e) fix paper-switch not working when used in paper-item (fixes [#1051](https://github.com/miguelcobain/ember-paper/issues/1051))
+
+### 1.0.0-beta.22
+- [444c762](https://github.com/miguelcobain/ember-paper/commit/444c7629f8fe6b137cffd67a2f5002558eaec241) bump ember-composability-tools to remove `new A()` deprecation
+- [#1044](https://github.com/miguelcobain/ember-paper/pull/1044) ensure `parentNode` is not null in translate3d
+- [#1045](https://github.com/miguelcobain/ember-paper/pull/1045) ensure component is not destroyed in next() callback in paper-select
+
 ### 1.0.0-beta.21
 - [#1036](https://github.com/miguelcobain/ember-paper/pull/1036) Fix infinite rendering issue with paper-tabs (fixes [#990](https://github.com/miguelcobain/ember-paper/issues/990))
 - [#1032](https://github.com/miguelcobain/ember-paper/pull/1032) Make paper-radio and paper-radio-group button accessible. paper-radio-group now yields a label component.
