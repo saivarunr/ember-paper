@@ -170,9 +170,7 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
 
   actions: {
     handleInput(e) {
-      if(!this.get('triggerOnBlur')){
-        invokeAction(this, 'onChange', e.target.value);
-      }
+      this.get('triggerOnBlur') ? this.set('_temp_value', e.target.value):invokeAction(this, 'onChange', e.target.value); 
       // setValue below ensures that the input value is the same as this.value
       run.next(() => {
         if (this.isDestroyed) {
@@ -188,7 +186,6 @@ export default Component.extend(FocusableMixin, ColorMixin, ChildMixin, Validati
 
     handleBlur(e) {
       if(this.get('triggerOnBlur')){
-        this.set('_temp_value', e.target.value);
         invokeAction(this, 'onChange', this.get('_temp_value'));
       }
       invokeAction(this, 'onBlur', e);
