@@ -56,8 +56,8 @@
       {{yield publicAPI selected}}
     {{/component}}
   {{/dropdown.trigger}}
-  {{#if paperSelectInfoText}}
-  <div class="{{paperSelectInfoTextClass}} paper-select-menu-info-text">{{paperSelectInfoText}}</div>
+  {{#if paperInfoText}}
+  <div class="{{paperInfoTextClass}} paper-info-text">{{paperInfoText}}</div>
   {{/if}}
   {{#dropdown.content
     class=(readonly concatenatedDropdownClasses)
