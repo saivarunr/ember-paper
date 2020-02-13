@@ -1,3 +1,32 @@
+{{#if paperInfoText}}
+<div class="layout-column flex">
+  <div>
+    <div class="md-switch-bar"></div>
+    <div class="md-container">
+      <div class="md-bar"></div>
+      <div class="md-thumb-container" style={{thumbContainerStyle}}>
+        <div class="md-thumb">
+        </div>
+      </div>
+    </div>
+    {{#if hasBlock}}
+    <div class="md-label">
+      {{yield}}
+    </div>
+    {{else}}
+    <div class="md-label">
+      {{label}}
+    </div>
+    {{/if}}
+  </div>
+  <div>
+    {{#if paperInfoText}}
+    <div class="{{paperInfoTextClass}} paper-info-text">{{paperInfoText}}</div>
+
+    {{/if}}
+  </div>
+</div>
+{{else}}
 <div class="md-switch-bar"></div>
 <div class="md-container">
   <div class="md-bar"></div>
@@ -7,11 +36,16 @@
   </div>
 </div>
 {{#if hasBlock}}
-  <div class="md-label">
-    {{yield}}
-  </div>
+<div class="md-label">
+  {{yield}}
+</div>
 {{else}}
-  <div class="md-label">
-    {{label}}
-  </div>
+<div class="md-label">
+  {{label}}
+</div>
 {{/if}}
+{{/if}}
+{{!-- {{#if paperInfoText}}
+  <div class="{{paperInfoTextClass}} paper-info-text">{{paperInfoText}}</div>
+
+  {{/if}} --}}

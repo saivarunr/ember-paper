@@ -2,15 +2,21 @@
   <div class="md-icon"></div>
 </div>
 {{#if hasBlock}}
-  <div class="md-label">
-    <span id={{labelId}}>
-      {{yield}}
-    </span>
-  </div>
+<div class="md-label">
+  <span id={{labelId}}>
+    {{yield}}
+  </span>
+  {{#if paperInfoText}}
+  <div class="{{paperInfoTextClass}} paper-info-text">{{paperInfoText}}</div>
+  {{/if}}
+</div>
 {{else}}
-  <div class="md-label">
-    <span id={{labelId}}>
-      {{label}}
-    </span>
-  </div>
+<div class="md-label">
+  <span id={{labelId}}>
+    {{label}}
+  </span>
+  {{#if paperInfoText}}
+  <div class="{{paperInfoTextClass}} paper-info-text">{{paperInfoText}}</div>
+  {{/if}}
+</div>
 {{/if}}
