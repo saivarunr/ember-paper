@@ -10,7 +10,6 @@
   disabled=(readonly disabled)
   searchEnabled=searchEnabled
   as |menu|}}
-
   {{#if shouldShowLabel}}
     <label for={{concat "ember-basic-dropdown-trigger-" publicAPI.uniqueId}} class={{if required "md-required"}}>{{label}}</label>
   {{/if}}
@@ -47,7 +46,9 @@
       {{yield opt term}}
     {{/component}}
   {{/menu.trigger}}
-
+  {{#if paperSelectInfoText}}
+  <div class="{{paperSelectInfoTextClass}} paper-select-menu-info-text">{{paperSelectInfoText}}</div>
+  {{/if}}
   {{#unless hideAllMessages}}
     <div class="md-errors-spacer">
       {{#if maxlength}}
