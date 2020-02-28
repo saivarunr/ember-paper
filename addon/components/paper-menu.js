@@ -184,5 +184,10 @@ export default BasicDropdownComponent.extend({
     dropdown.didAnimateScale = true;
 
     return { style, horizontalPosition: '', verticalPosition: '' };
+  },
+  didInsertElement(){
+    if(this.registerApi){
+      this.registerApi(this.get('publicAPI'));
+    }
   }
 });
