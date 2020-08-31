@@ -7,7 +7,17 @@
   {{#each content as |item index|}}
 
     {{! template-lint-disable no-invalid-interactive }}
-    <md-chip class="md-chip md-default-theme {{if readOnly "md-readonly"}} {{if (eq activeChip index) "md-focused"}}" onclick={{action "chipClick" index}}>
+    <md-chip
+      class="md-chip md-default-theme
+        {{if readOnly "md-readonly"}}
+
+        {{if (eq activeChip index) "md-focused"}}"
+      onclick={{action "chipClick" index}}
+      draggable={{draggable}}
+      ondragstart={{action "onDragStart" index}}
+      ondrop={{action "onDrop" index}}
+      ondragover={{action "allowDrop"}}
+    >
       <div class="md-chip-content" tabindex="-1" aria-hidden="true">
         {{#if hasBlock}}
           {{yield item}}

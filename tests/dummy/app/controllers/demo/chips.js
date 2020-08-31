@@ -153,6 +153,9 @@ export default Controller.extend({
 
     removeAltContact(item) {
       this.get('selectedAltContacts').removeObject(item);
+    },
+    dropCallback() {
+      console.log("Callback on drop executed");
     }
   }
 });

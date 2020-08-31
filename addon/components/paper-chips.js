@@ -179,6 +179,19 @@ export default Component.extend({
         event.stopPropagation();
         return false;
       }
+    },
+    onDragStart(index, event) {
+      event.dataTransfer.setData('index', index)
+    },
+    onDrop(index, event) {
+      const indexOfTheDroppedChip = Number.parseInt(event.dataTransfer.getData('index'));
+      const selectedChip = this.get(`content.${indexOfTheDroppedChip}`);
+      this.get('content').removeAt(indexOfTheDroppedChip);
+      this.get('content').insertAt(index, selectedChip);
+      this.dropCallback()
+    },
+    allowDrop(event) {
+      event.preventDefault();
     }
   },
 

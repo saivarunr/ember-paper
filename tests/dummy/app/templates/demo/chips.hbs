@@ -12,11 +12,14 @@
       {{! BEGIN-SNIPPET chips.example }}
       <h2>Default Template</h2>
       {{paper-chips
+        draggable=true
+        label="Fruits"
         content=fruitNames
         readOnly=readOnly
         removeItem=(action "removeItem")
         addItem=(action "addItem")
-        placeholder="Add a tag"}}
+        placeholder="Add a tag"
+        dropCallback=(action "dropCallback")}}
 
       <h2>Custom Template</h2>
       {{#paper-chips
