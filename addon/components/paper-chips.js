@@ -188,7 +188,9 @@ export default Component.extend({
       const selectedChip = this.get(`content.${indexOfTheDroppedChip}`);
       this.get('content').removeAt(indexOfTheDroppedChip);
       this.get('content').insertAt(index, selectedChip);
-      this.dropCallback()
+      if(this.dropCallback) {
+        this.dropCallback()
+      }
     },
     allowDrop(event) {
       event.preventDefault();
