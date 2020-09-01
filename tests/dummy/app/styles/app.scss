@@ -45,3 +45,10 @@ md-toolbar.md-warn {
 .inner-sidenav {
   position: relative;
 }
+.chip-label{ 
+  position: relative;
+  font-size: 12px;
+  padding-left: 3px;
+  top: 8px;
+  color: var(--foreground-2);
+}
